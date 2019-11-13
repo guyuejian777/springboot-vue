@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.dajian.vhrserver.mapper.HrMapper">
+    <resultMap id="baseMap" type="com.dajian.vhrserver.pojo.Hr">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="phone" property="phone"/>
+        <result column="telephone" property="telephone"/>
+        <result column="address" property="address"/>
+        <result column="enabled" property="enabled"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="userface" property="userface"/>
+        <result column="remark" property="remark"/>
+        <collection property="roles" ofType="com.dajian.vhrserver.pojo.Role">
+            <id column="rid" property="id"/>
+            <result column="rname" property="name"/>
+            <result column="rnamezh" property="nameZh"/>
+        </collection>
+    </resultMap>
+
+    <select id="getUserByUsername" resultMap="baseMap">
+        SELECT h.*, r.id AS rid, r.`name` AS rname, r.nameZh AS rnameZh FROM hr h, hr_role h_r, role r WHERE h.id=h_r.hrid AND r.id=h_r.rid AND h.username=#{username}
+    </select>
+
+    <insert id="insertHr">
+        INSERT INTO hr (id,username,password) values (null,#{username},#{password})
+    </insert>
+
+
+    <select id="getHrsByPage" resultMap="baseMap">
+        SELECT h.*, r.id AS rid, r.`name` AS rname, r.nameZh AS rnameZh FROM hr h, hr_role h_r, role r
+        WHERE h.id=h_r.hrid AND r.id=h_r.rid
+        AND h.id NOT IN(SELECT h_r.hrid FROM hr_role h_r, role r WHERE h_r.rid=r.id AND r.nameZh='系统管理员')
+        <if test="key != 'all' and key !=''">
+            AND h.`name` LIKE CONCAT('%',#{key},'%')
+        </if>
+        <if test="start != null and rows != null">
+            LIMIT #{start},#{rows}
+        </if>
+    </select>
+
+    <select id="getHrById" resultMap="baseMap">
+        SELECT h.*, r.id AS rid, r.`name` AS rname, r.nameZh AS rnameZh FROM hr h,  hr_role h_r, role r
+         WHERE h.id=h_r.hrid AND r.id=h_r.rid AND
+         h.`id`=#{hrId}
+    </select>
+
+    <update id="updateHrEnabled" parameterType="com.dajian.vhrserver.pojo.Hr">
+        UPDATE hr
+        <set>
+            <if test="name != null">
+                name=#{name},
+            </if>
+            <if test="phone != null">
+                phone=#{phone},
+            </if>
+            <if test="telephone != null">
+                telephone=#{telephone},
+            </if>
+            <if test="address != null">
+                address=#{address},
+            </if>
+            <if test="enabled != null">
+                enabled=#{enabled},
+            </if>
+            <if test="username != null">
+                username=#{username},
+            </if>
+            <if test="password != null">
+                password=#{password},
+            </if>
+            <if test="remark != null">
+                remark=#{remark},
+            </if>
+        </set>
+         WHERE id=#{id}
+    </update>
+
+    <delete id="deleteHrById">
+        DELETE FROM hr WHERE id=#{hrId}
+    </delete>
+
+</mapper>

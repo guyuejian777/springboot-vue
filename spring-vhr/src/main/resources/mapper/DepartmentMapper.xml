@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.dajian.vhrserver.mapper.DepartmentMapper">
+    <resultMap id="baseMap" type="com.dajian.vhrserver.pojo.Department">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="parentId" property="parentId" jdbcType="INTEGER"/>
+        <result column="isParent" property="isParent" jdbcType="TINYINT"/>
+        <collection property="children" ofType="com.dajian.vhrserver.pojo.Department" select="com.dajian.vhrserver.mapper.DepartmentMapper.getDepartmentByPid" column="id">
+        </collection>
+    </resultMap>
+
+    <select id="getDepartmentByPid" resultMap="baseMap">
+        SELECT * FROM department WHERE parentId=#{pid} AND enabled=TRUE
+    </select>
+
+    <select id="getAllDepartment" resultMap="baseMap">
+        SELECT * FROM department WHERE enabled=TRUE
+    </select>
+
+    <insert id="saveDepartment" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO department (id,name, parentId,enabled) VALUES(#{id},#{name},#{parentId},#{enabled})
+    </insert>
+
+    <select id="getParentDepartmentDePath" resultType="java.lang.String">
+        SELECT depPath FROM department WHERE id=#{pid}
+    </select>
+
+    <update id="updateParentDepParentId">
+        UPDATE department SET isParent=TRUE WHERE id=#{pid}
+    </update>
+
+    <update id="updateDepartment">
+        UPDATE department
+        <set>
+            <if test="name !=null">
+                name=#{name},
+            </if>
+            <if test="depPath !=null">
+                depPath=#{depPath},
+            </if>
+            <if test="parentId !=null">
+                parentId=#{parentId},
+            </if>
+            <if test="enabled !=null">
+                enabled=#{enabled},
+            </if>
+            <if test="isParent !=null">
+                isParent=#{isParent},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+
+    <select id="getDepartmentById" parameterType="long" resultMap="baseMap">
+        SELECT * FROM department WHERE id=#{id}
+    </select>
+
+    <delete id="deleteDepartmentById" parameterType="long">
+        DELETE FROM department WHERE id=#{id}
+    </delete>
+</mapper>

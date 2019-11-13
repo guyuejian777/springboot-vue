@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.dajian.vhrserver.mapper.EmployeeMapper">
+    <resultMap id="baseMap" type="com.dajian.vhrserver.pojo.EmployeeBo">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+
+        <result column="gender" property="gender"/>
+        <result column="birthday" property="birthday"/>
+        <result column="idCard" property="idCard"/>
+        <result column="wedlock" property="wedlock"/>
+        <result column="nationId" property="nationId"/>
+        <result column="nativePlace" property="nativePlace"/>
+        <result column="politicId" property="politicId"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
+        <result column="address" property="address"/>
+        <result column="departmentId" property="departmentId"/>
+        <result column="jobLevelId" property="jobLevelId"/>
+        <result column="posId" property="posId"/>
+        <result column="engageForm" property="engageForm"/>
+        <result column="tiptopDegree" property="tiptopDegree"/>
+        <result column="specialty" property="specialty"/>
+        <result column="school" property="school"/>
+        <result column="beginDate" property="beginDate" jdbcType="TIMESTAMP"/>
+        <result column="workState" property="workState"/>
+        <result column="workID" property="workID"/>
+        <result column="contractTerm" property="contractTerm"/>
+        <result column="conversionTime" property="conversionTime"/>
+        <result column="notWorkDate" property="notWorkDate"/>
+        <result column="beginContract" property="beginContract"/>
+        <result column="endContract" property="endContract"/>
+        <result column="workAge" property="workAge"/>
+        <result column="nname" property="nationName"/>
+        <result column="psname" property="politicName"/>
+        <result column="dname" property="departmentName"/>
+        <result column="jlname" property="jobLevelName"/>
+        <result column="pname" property="posName"/>
+
+        <association property="salary" javaType="com.dajian.vhrserver.pojo.Salary">
+            <id column="sid" property="id" jdbcType="INTEGER"/>
+            <result column="basicSalary" property="basicSalary" jdbcType="INTEGER"/>
+            <result column="bonus" property="bonus" jdbcType="INTEGER"/>
+            <result column="lunchSalary" property="lunchSalary" jdbcType="INTEGER"/>
+            <result column="trafficSalary" property="trafficSalary" jdbcType="INTEGER"/>
+            <result column="allSalary" property="allSalary" jdbcType="INTEGER"/>
+            <result column="pensionBase" property="pensionBase" jdbcType="INTEGER"/>
+            <result column="pensionPer" property="pensionPer" jdbcType="FLOAT"/>
+            <result column="createDate" property="createDate" jdbcType="TIMESTAMP"/>
+            <result column="medicalBase" property="medicalBase" jdbcType="INTEGER"/>
+            <result column="medicalPer" property="medicalPer" jdbcType="FLOAT"/>
+            <result column="accumulationFundBase" property="accumulationFundBase" jdbcType="INTEGER"/>
+            <result column="accumulationFundPer" property="accumulationFundPer" jdbcType="FLOAT"/>
+            <result column="sname" property="name" jdbcType="VARCHAR"/>
+        </association>
+    </resultMap>
+
+    <select id="getEmployeesByPage" resultMap="baseMap">
+        SELECT e.*, s.id AS sid,s.`name` AS sname,s.bonus, s.basicSalary, s.lunchSalary,s.allSalary,s.trafficSalary,
+        s.accumulationFundPer,s.accumulationFundBase,s.medicalPer,s.medicalBase, s.pensionPer,s.pensionBase, n.`name` AS
+        nname, ps.`name` AS psname, d.`name` AS dname, jl.`name` AS jlname, p.`name` AS pname
+        FROM employee e, nation n, politicsstatus ps, department d, joblevel jl, position p, emp_salary es, salary s
+        WHERE e.nationId=n.id AND e.politicId=ps.id AND e.departmentId=d.id AND e.jobLevelId=jl.id AND e.posId=p.id
+        <if test="key!=null and key!=''">
+            AND e.`name` LIKE CONCAT('%',#{key},'%')
+        </if>
+        <if test="nationId!=null">
+            AND e.nationId=#{nationId}
+        </if>
+        <if test="politicId!=null">
+            AND e.politicId=#{politicId}
+        </if>
+        <if test="departmentId!=null">
+            AND e.departmentId=#{departmentId}
+        </if>
+        <if test="jobLevelId!=null">
+            AND e.jobLevelId=#{jobLevelId}
+        </if>
+        <if test="posId!=null">
+            AND e.posId=#{posId}
+        </if>
+        <if test="engageForm!=null and engageForm!=''">
+            AND e.engageForm=#{engageForm}
+        </if>
+        <if test="beginWorkDate!=null and endWorkDate!=null">
+            AND e.beginDate between #{beginWorkDate} and #{endWorkDate}
+        </if>
+        <if test="sortBy!=null">
+            ORDER BY #{sortBy}
+        </if>
+        <if test="desc!=null and desc==true">
+            DESC
+        </if>
+        <if test="desc!=null and desc==false">
+            ASC
+        </if>
+        <if test="start!=null and rows!=null">
+            limit #{start},#{rows}
+        </if>
+
+    </select>
+
+    <select id="getTotal" resultType="Long">
+        SELECT COUNT(*) FROM employee e
+        <where>
+            <if test="key!=null and key!=''">
+                e.`name` LIKE CONCAT('%',#{key},'%')
+            </if>
+            <if test="nationId!=null">
+                AND e.nationId=#{nationId}
+            </if>
+            <if test="politicId!=null">
+                AND e.politicId=#{politicId}
+            </if>
+            <if test="departmentId!=null">
+                AND e.departmentId=#{departmentId}
+            </if>
+            <if test="jobLevelId!=null">
+                AND e.jobLevelId=#{jobLevelId}
+            </if>
+            <if test="posId!=null">
+                AND e.posId=#{posId}
+            </if>
+            <if test="engageForm!=null and engageForm!=''">
+                AND e.engageForm=#{engageForm}
+            </if>
+            <if test="beginWorkDate!=null and endWorkDate!=null">
+                AND e.beginDate BETWEEN #{beginWorkDate} AND #{endWorkDate}
+            </if>
+        </where>
+
+    </select>
+
+    <select id="getMaxWorkID" resultType="Long">
+        SELECT workID FROM employee WHERE id=(SELECT MAX(id) FROM employee)
+    </select>
+
+    <insert id="saveEmployee" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO employee (name, gender,
+      birthday, idCard, wedlock, nationId,
+      nativePlace, politicId, email,
+      phone, address, departmentId,
+      jobLevelId, posId, engageForm,
+      tiptopDegree, specialty, school,
+      beginDate,workID,
+      contractTerm, conversionTime,
+      beginContract, endContract, workAge
+      ) VALUES (#{name}, #{gender},
+      #{birthday}, #{idCard}, #{wedlock}, #{nationId},
+      #{nativePlace}, #{politicId}, #{email},
+      #{phone}, #{address}, #{departmentId},
+      #{jobLevelId}, #{posId}, #{engageForm},
+      #{tiptopDegree}, #{specialty}, #{school},
+      #{beginDate},#{workID},
+      #{contractTerm}, #{conversionTime},
+      #{beginContract}, #{endContract}, #{workAge}
+      )
+    </insert>
+
+    <update id="updateEmployee">
+        UPDATE employee
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="gender != null">
+                gender = #{gender},
+            </if>
+            <if test="birthday != null">
+                birthday = #{birthday},
+            </if>
+            <if test="idCard != null">
+                idCard = #{idCard},
+            </if>
+            <if test="wedlock != null">
+                wedlock = #{wedlock},
+            </if>
+            <if test="nationId != null">
+                nationId = #{nationId},
+            </if>
+            <if test="nativePlace != null">
+                nativePlace = #{nativePlace},
+            </if>
+            <if test="politicId != null">
+                politicId = #{politicId},
+            </if>
+            <if test="email != null">
+                email = #{email},
+            </if>
+            <if test="phone != null">
+                phone = #{phone},
+            </if>
+            <if test="address != null">
+                address = #{address},
+            </if>
+            <if test="departmentId != null">
+                departmentId = #{departmentId},
+            </if>
+            <if test="jobLevelId != null">
+                jobLevelId = #{jobLevelId},
+            </if>
+            <if test="posId != null">
+                posId = #{posId},
+            </if>
+            <if test="engageForm != null">
+                engageForm = #{engageForm},s
+            </if>
+            <if test="tiptopDegree != null">
+                tiptopDegree = #{tiptopDegree},
+            </if>
+            <if test="specialty != null">
+                specialty = #{specialty},
+            </if>
+            <if test="school != null">
+                school = #{school},
+            </if>
+            <if test="beginDate != null">
+                beginDate = #{beginDate},
+            </if>
+            <if test="workState != null">
+                workState = #{workState},
+            </if>
+            <if test="contractTerm != null">
+                contractTerm = #{contractTerm},
+            </if>
+            <if test="conversionTime != null">
+                conversionTime = #{conversionTime},
+            </if>
+            <if test="notWorkDate != null">
+                notWorkDate = #{notWorkDate},
+            </if>
+            <if test="beginContract != null">
+                beginContract = #{beginContract},
+            </if>
+            <if test="endContract != null">
+                endContract = #{endContract},
+            </if>
+        </set>
+        WHERE id=#{id}
+    </update>
+
+
+    <delete id="deleteEmployeeById" parameterType="Long">
+        DELETE FROM employee WHERE id=#{id}
+    </delete>
+
+    <select id="getCfgData" resultMap="baseMap">
+        SELECT e.*, s.id AS sid,s.`name` AS sname,s.bonus, s.basicSalary,
+        s.lunchSalary,s.allSalary,s.trafficSalary,
+        s.accumulationFundPer,s.accumulationFundBase,s.medicalPer,s.medicalBase, s.pensionPer,s.pensionBase,d.`name` AS
+        dname,d.id AS did
+        FROM employee e LEFT JOIN department d ON e.departmentId=d.id LEFT JOIN emp_salary es ON e.id=es.eid LEFT JOIN
+        salary s ON s.id=es.sid
+        <where>
+            <if test="key!=null and key!=''">
+                e.`name` LIKE CONCAT('%',#{key},'%')
+            </if>
+        </where>
+        limit #{start},#{rows}
+    </select>
+</mapper>
